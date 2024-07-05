@@ -2,8 +2,11 @@ package com.example.chatwave
 
 import android.net.Uri
 import android.util.Log
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.text.isDigitsOnly
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.chatwave.data.CHATS
 import com.example.chatwave.data.ChatData
@@ -15,6 +18,7 @@ import com.example.chatwave.data.STATUS
 import com.example.chatwave.data.Status
 import com.example.chatwave.data.USER_NODE
 import com.example.chatwave.data.UserData
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.FirebaseFirestore
@@ -40,10 +44,10 @@ class CWViewModel @Inject constructor(
     val eventMuableState = mutableStateOf<Event<String>?>(null)
     val userData = mutableStateOf<UserData?>(null)
     val chats = mutableStateOf<List<ChatData>>(listOf())
-    val chatMessages = mutableStateOf<List<Message>>(listOf())
+    var chatMessages by mutableStateOf<List<Message>>(emptyList())
     val inProgressChatMessage = mutableStateOf(false)
     var currentChatMessageListener: ListenerRegistration? = null
-    val status = mutableStateOf<List<Status>>(listOf())
+    val status = MutableLiveData<List<Status>>(listOf())
     val inProgressStatus = mutableStateOf(false)
 
     init {
@@ -136,6 +140,48 @@ class CWViewModel @Inject constructor(
                     }.addOnFailureListener { exception ->
                         handleException(exception, "Failed to update user data")
                     }
+
+                    //Updating the CHATS document when user update their profile
+                    db.collection(CHATS).whereEqualTo("user1.userId",userData.userId).get().addOnSuccessListener {
+
+                        val batch = db.batch()
+                        for (document in it) {
+                            batch.update(document.reference, "user1.imageUrl", userData.imageUrl)
+                        }
+                        batch.commit()
+
+
+                    }.addOnFailureListener {
+                        handleException(it)
+                    }
+
+                    db.collection(CHATS).whereEqualTo("user2.userId",userData.userId).get().addOnSuccessListener {
+
+                        val batch = db.batch()
+                        for (document in it) {
+                            batch.update(document.reference, "user2.imageUrl", userData.imageUrl)
+                        }
+                        batch.commit()
+
+
+                    }.addOnFailureListener {
+                        handleException(it)
+                    }
+
+                    db.collection(STATUS).whereEqualTo("user.userId",userData.userId).get().addOnSuccessListener {
+
+                        val batch = db.batch()
+                        for (document in it) {
+                            batch.update(document.reference, "user.imageUrl", userData.imageUrl)
+                        }
+                        batch.commit()
+
+
+                    }.addOnFailureListener {
+                        handleException(it)
+                    }
+
+
                 } else {
                     db.collection(USER_NODE).document(uid).set(userData).addOnSuccessListener {
                         inProcess.value = false
@@ -286,11 +332,11 @@ class CWViewModel @Inject constructor(
     }
 
     fun onSendReply(chatId: String, message: String) {
-        val time = Calendar.getInstance().time.toString()
+        val time = Calendar.getInstance().time
         val msg = Message(
             userData.value?.userId,
             message,
-            time
+            timestamp = Timestamp(time)
         )
 
         db.collection(CHATS).document(chatId).collection(MESSAGE).document().set(msg)
@@ -305,18 +351,18 @@ class CWViewModel @Inject constructor(
                     handleException(error)
                 }
                 if (value != null) {
-                    chatMessages.value = value.documents.mapNotNull {
+                    chatMessages = value.documents.mapNotNull {
                         it.toObject<Message>()
-                    }.sortedBy { it.timestamp }
+                    }.sortedWith(compareByDescending<Message?> {
+                        it?.timestamp ?: Long.MIN_VALUE
+                    }).reversed()
                     inProgressChatMessage.value = false
                 }
-
-
             }
     }
 
     fun depopulateMessages() {
-        chatMessages.value = listOf()
+        chatMessages = listOf()
         currentChatMessageListener = null
     }
 
@@ -339,7 +385,12 @@ class CWViewModel @Inject constructor(
 
         )
 
-        db.collection(STATUS).document().set(newStatus)
+        db.collection(STATUS).add(newStatus).addOnSuccessListener {
+            // Status created successfully, update the local status list
+            status.value = status.value?.plus(listOf(newStatus))
+        }.addOnFailureListener { exception ->
+            handleException(exception, "Failed to create status")
+        }
     }
 
     fun populateStatuses() {
@@ -377,6 +428,9 @@ class CWViewModel @Inject constructor(
                             status.value = statuses
                             inProgressStatus.value = false
                         }
+                        inProgressStatus.value = false
+
+
 
 
                     }

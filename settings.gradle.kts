@@ -15,4 +15,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Chatwave"
 include(":app")
- 
+
+include(":StencilMolecules")

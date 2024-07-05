@@ -1,5 +1,7 @@
 package com.example.chatwave.data
 
+import com.google.firebase.Timestamp
+
 data class UserData(
 
     var userId: String?="",
@@ -33,7 +35,8 @@ data class ChatUser(
 data class Message(
     val sendBy: String? = "",
     val message: String? ="",
-    val timestamp: String? = ""
+//    val timestamp: String? = ""
+    val timestamp: Timestamp? = Timestamp.now()
 )
 
 data class Status(

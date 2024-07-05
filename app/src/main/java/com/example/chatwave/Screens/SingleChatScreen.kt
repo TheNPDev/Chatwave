@@ -16,8 +16,12 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.Button
@@ -29,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,6 +51,7 @@ import com.example.chatwave.CommonDivider
 import com.example.chatwave.CommonImage
 import com.example.chatwave.R
 import com.example.chatwave.data.Message
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -62,7 +68,7 @@ fun SingleChatScreen(navController: NavController, viewModel: CWViewModel, chatI
     val currentChat = viewModel.chats.value.first { it.chatId == chatId }
     val chatUser =
         if (currentChat.user1.userId == myUser?.userId) currentChat.user2 else currentChat.user1
-    var chatMessages = viewModel.chatMessages
+    val chatMessages = viewModel.chatMessages
 
     LaunchedEffect(key1 = Unit) {
         viewModel.populateMessages(chatId)
@@ -80,8 +86,9 @@ fun SingleChatScreen(navController: NavController, viewModel: CWViewModel, chatI
         }
         CommonDivider()
         MessageBox(
-            modifier = Modifier.weight(1f),
-            chatMessages = chatMessages.value,
+            modifier = Modifier
+                .weight(1f),
+            chatMessages = chatMessages,
             currentUserId = myUser?.userId ?: ""
         )
 
@@ -163,6 +170,7 @@ fun replyBox(reply: String, onReplyChange: (String) -> Unit, onSendReply: () -> 
 @Composable
 fun MessageBox(modifier: Modifier, chatMessages: List<Message>, currentUserId: String) {
 
+
     LazyColumn(modifier = modifier) {
         items(chatMessages) { msg ->
 
@@ -185,5 +193,7 @@ fun MessageBox(modifier: Modifier, chatMessages: List<Message>, currentUserId: S
                 )
             }
         }
+
+
     }
 }

@@ -22,6 +22,7 @@ import com.example.chatwave.Screens.SingleChatScreen
 import com.example.chatwave.Screens.SingleStatusScreen
 import com.example.chatwave.Screens.StatusScreen
 import com.example.chatwave.ui.theme.ChatwaveTheme
+import com.example.stencilmolecules.LoginMolecule
 import dagger.hilt.android.AndroidEntryPoint
 
 sealed class DestinationScreen(var route: String){
@@ -96,5 +97,8 @@ class MainActivity : ComponentActivity() {
         }
 
     }
+
+
+
 }
 

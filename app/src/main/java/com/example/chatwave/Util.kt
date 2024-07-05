@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
@@ -109,28 +111,34 @@ fun TitleText(txt: String) {
 
 @Composable
 fun CommonRow(imageUrl: String?, name: String?, onItemClick: () -> Unit) {
-
-    Row(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(75.dp)
-            .clickable { onItemClick.invoke() },
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .clickable(onClick = onItemClick),
+        elevation = CardDefaults.cardElevation(4.dp),
+        colors = CardDefaults.cardColors(Color.White )
     ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            CommonImage(
+                data = imageUrl,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .size(50.dp)
+                    .clip(CircleShape)
+            )
 
-        CommonImage(
-            data = imageUrl,
-            modifier = Modifier
-                .padding(8.dp)
-                .size(50.dp)
-                .clip(CircleShape)
-                .background(Color.Cyan)
-        )
-
-        Text(text = name?: "----",
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 4.dp)
-        )
+            Text(
+                text = name ?: "----",
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+        }
     }
 }
+
+
 

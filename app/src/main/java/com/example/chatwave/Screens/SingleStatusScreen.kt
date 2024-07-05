@@ -32,36 +32,38 @@ enum class State {
 @Composable
 fun SingleStatusScreen(navController: NavController, viewModel: CWViewModel, userId: String) {
 
-    val statuses = viewModel.status.value.filter {
+    val statuses = viewModel.status.value?.filter {
         it.user.userId == userId
 
     }
 
-    if (statuses.isNotEmpty()) {
-        val currentStatus = remember {
-            mutableStateOf(0)
-        }
+    if (statuses != null) {
+        if (statuses.isNotEmpty()) {
+            val currentStatus = remember {
+                mutableStateOf(0)
+            }
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black)
-        ) {
-            CommonImage(
-                data = statuses[currentStatus.value].imageUrl,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit
-            )
-            Row(modifier = Modifier.fillMaxWidth()) {
-                statuses.forEachIndexed { index, status ->
-                    CustomProgressIndicator(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(7.dp)
-                            .padding(1.dp),
-                        state = if (currentStatus.value < index) State.INITIAL else if (currentStatus.value == index) State.ACTIVE else State.COMPLETED
-                    ) {
-                        if(currentStatus.value<statuses.size-1)currentStatus.value++ else navController.popBackStack()
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black)
+            ) {
+                CommonImage(
+                    data = statuses[currentStatus.value].imageUrl,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit
+                )
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    statuses.forEachIndexed { index, status ->
+                        CustomProgressIndicator(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(7.dp)
+                                .padding(1.dp),
+                            state = if (currentStatus.value < index) State.INITIAL else if (currentStatus.value == index) State.ACTIVE else State.COMPLETED
+                        ) {
+                            if(currentStatus.value<statuses.size-1)currentStatus.value++ else navController.popBackStack()
+                        }
                     }
                 }
             }
