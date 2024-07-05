@@ -62,7 +62,7 @@ publishing{
         register<MavenPublication>("release"){
             groupId = "com.github.TheNPDev"
             artifactId = "Chatwave"
-            version = "1.0.0"
+            version = "4.0.0"
 
             afterEvaluate{
                 from(components["release"])
