@@ -65,6 +65,7 @@ fun SingleStatusScreen(navController: NavController, viewModel: CWViewModel, use
                             if(currentStatus.value<statuses.size-1)currentStatus.value++ else navController.popBackStack()
                         }
                     }
+
                 }
             }
         }
